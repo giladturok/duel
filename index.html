@@ -3,1204 +3,499 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Primary Meta Tags -->
-  <meta name="title" content="DUEL: Exact Likelihood for Masked Diffusion via Deterministic Unmasking">
-  <meta name="description" content="We introduce DUEL, a framework for proper likelihood evaluation in masked diffusion models—exact (not a bound) and under the test-time distribution. DUEL closes the perplexity gap with ARMs by up to 82%.">
-  <meta name="keywords" content="masked diffusion, discrete diffusion, language models, likelihood estimation, MDLM, LLaDA, machine learning">
-  <meta name="author" content="Gilad Turok, Chris De Sa, Volodymyr Kuleshov">
-  <meta name="robots" content="index, follow">
-  <meta name="language" content="English">
-
-  <!-- Open Graph / Facebook -->
+  <title>DUEL: Exact Likelihood Reshapes Masked Diffusion Scaling Laws and Beyond</title>
+  <meta name="description" content="DUEL computes the exact likelihood of a masked diffusion model under the deterministic sampler actually used. Under DUEL the MDM–AR compute gap falls from 16× to 9×.">
+  <meta name="author" content="Gilad Turok, Yair Schiff, Chris De Sa, Volodymyr Kuleshov">
   <meta property="og:type" content="article">
-  <meta property="og:site_name" content="Cornell University">
-  <meta property="og:title" content="DUEL: Exact Likelihood for Masked Diffusion via Deterministic Unmasking">
-  <meta property="og:description" content="We introduce DUEL, a framework for proper likelihood evaluation in masked diffusion models—exact (not a bound) and under the test-time distribution. DUEL closes the perplexity gap with ARMs by up to 82%.">
-  <meta property="og:url" content="https://github.com/kuleshov-group/duel">
-  <meta property="og:image" content="static/images/social_preview.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="DUEL - Exact Likelihood for Masked Diffusion">
-  <meta property="article:published_time" content="2026-01-01T00:00:00.000Z">
-  <meta property="article:author" content="Gilad Turok">
-  <meta property="article:section" content="Research">
-  <meta property="article:tag" content="masked diffusion">
-  <meta property="article:tag" content="language models">
-
-  <!-- Twitter -->
+  <meta property="og:title" content="DUEL: Exact Likelihood Reshapes Masked Diffusion Scaling Laws and Beyond">
+  <meta property="og:description" content="Exact likelihood for masked diffusion models under deterministic unmasking. The MDM–AR compute gap falls from 16× to 9×.">
+  <meta property="og:url" content="https://giladturok.github.io/duel/">
+  <meta property="og:image" content="https://giladturok.github.io/duel/static/images/scaling_frontiers_two_panel.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="DUEL: Exact Likelihood for Masked Diffusion via Deterministic Unmasking">
-  <meta name="twitter:description" content="We introduce DUEL, a framework for proper likelihood evaluation in masked diffusion models—exact (not a bound) and under the test-time distribution. DUEL closes the perplexity gap with ARMs by up to 82%.">
-  <meta name="twitter:image" content="static/images/social_preview.png">
-  <meta name="twitter:image:alt" content="DUEL - Exact Likelihood for Masked Diffusion">
-
-  <!-- Academic/Research Specific -->
-  <meta name="citation_title" content="DUEL: Exact Likelihood for Masked Diffusion via Deterministic Unmasking">
+  <meta name="citation_title" content="DUEL: Exact Likelihood Reshapes Masked Diffusion Scaling Laws and Beyond">
   <meta name="citation_author" content="Turok, Gilad">
+  <meta name="citation_author" content="Schiff, Yair">
   <meta name="citation_author" content="De Sa, Chris">
   <meta name="citation_author" content="Kuleshov, Volodymyr">
-  <meta name="citation_publication_date" content="2026">
-  <!-- <meta name="citation_conference_title" content="International Conference on Machine Learning (ICML)"> -->
+  <meta name="citation_arxiv_id" content="2603.01367">
+  <link rel="icon" href="favicon.ico">
 
-  <!-- Additional SEO -->
-  <meta name="theme-color" content="#2563eb">
-  <meta name="msapplication-TileColor" content="#2563eb">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-
-  <!-- Preconnect for performance -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://cdn.jsdelivr.net">
-
-  <title>DUEL: Exact Likelihood for Masked Diffusion</title>
-
-  <!-- Favicon and App Icons -->
-  <link rel="icon" href="/favicon.ico?v=3" sizes="any">
-  <link rel="icon" type="image/x-icon" href="static/images/favicon.ico?v=3">
-  <link rel="icon" type="image/png" href="static/images/favicon.png?v=3" sizes="32x32">
-  <link rel="apple-touch-icon" href="static/images/favicon.png?v=3">
-
-  <!-- Critical CSS - Load synchronously -->
-  <link rel="stylesheet" href="static/css/bulma.min.css">
-  <link rel="stylesheet" href="static/css/index.css">
-
-  <!-- Non-critical CSS - Load asynchronously -->
-  <link rel="preload" href="static/css/fontawesome.all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <link rel="preload" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-
-  <!-- Fallback for browsers that don't support preload -->
-  <noscript>
-    <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-  </noscript>
-
-  <!-- Fonts - Optimized loading -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- MathJax for equations -->
-  <script>
-    MathJax = {
-      tex: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']],
-        displayMath: [['$$', '$$'], ['\\[', '\\]']],
-        processEscapes: true
-      },
-      svg: {
-        fontCache: 'global'
-      }
-    };
-  </script>
-  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-
-  <!-- Defer non-critical JavaScript -->
-  <script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script defer src="static/js/fontawesome.all.min.js"></script>
-  <script defer src="static/js/index.js"></script>
-
-  <!-- Structured Data for Academic Papers -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "ScholarlyArticle",
-    "headline": "DUEL: Exact Likelihood for Masked Diffusion via Deterministic Unmasking",
-    "description": "We introduce DUEL, a framework for exact likelihood computation in masked diffusion models under deterministic position selection.",
-    "author": [
-      {
-        "@type": "Person",
-        "name": "Gilad Turok",
-        "affiliation": {
-          "@type": "Organization",
-          "name": "Cornell University"
-        }
-      },
-      {
-        "@type": "Person",
-        "name": "Chris De Sa",
-        "affiliation": {
-          "@type": "Organization",
-          "name": "Cornell University"
-        }
-      },
-      {
-        "@type": "Person",
-        "name": "Volodymyr Kuleshov",
-        "affiliation": {
-          "@type": "Organization",
-          "name": "Cornell University"
-        }
-      }
-    ],
-    "datePublished": "2026-01-01",
-    "publisher": {
-      "@type": "Organization",
-      "name": "Cornell University"
-    },
-    "keywords": ["masked diffusion", "discrete diffusion", "language models", "likelihood estimation", "machine learning"],
-    "isAccessibleForFree": true
-  }
-  </script>
-
-  <style>
-    /* Custom styles for DUEL page */
-    .citation {
-      color: #2563eb;
-      text-decoration: none;
-      font-size: 0.9em;
-    }
-    .citation:hover {
-      text-decoration: underline;
-    }
-
-    .algorithm-box {
-      background: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin: 1rem 0;
-      font-family: 'Courier New', monospace;
-      font-size: 0.9rem;
-      overflow-x: auto;
-    }
-    .algorithm-box .algo-title {
-      font-weight: bold;
-      font-size: 1rem;
-      margin-bottom: 0.5rem;
-      color: #333;
-      font-family: 'Inter', sans-serif;
-    }
-    .algorithm-box .algo-line {
-      margin: 0.25rem 0;
-      white-space: pre-wrap;
-    }
-    .algorithm-box .keyword {
-      color: #0066cc;
-      font-weight: bold;
-    }
-    .algorithm-box .comment {
-      color: #6c757d;
-      font-style: italic;
-    }
-    .algorithm-box .denoiser {
-      color: #7c3aed;
-    }
-    .algorithm-box .rule {
-      color: #2563eb;
-    }
-    .algorithm-box .highlight-sample {
-      color: #0d6efd;
-    }
-    .algorithm-box .highlight-ll {
-      color: #198754;
-    }
-
-    .equation-box {
-      background: #f8f9fa;
-      border-left: 4px solid #2563eb;
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
-      overflow-x: auto;
-    }
-    .equation-box .eq-label {
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 0.5rem;
-    }
-
-    .theorem-box {
-      background: white;
-      border: 2px solid #7c3aed;
-      border-radius: 8px;
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
-      overflow-x: auto;
-    }
-    .theorem-box .theorem-title {
-      font-weight: 600;
-      color: #7c3aed;
-      margin-bottom: 0.5rem;
-    }
-
-    .definition-box {
-      background: white;
-      border: 2px solid #2563eb;
-      border-radius: 8px;
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
-      overflow-x: auto;
-    }
-    .definition-box .def-title {
-      font-weight: 600;
-      color: #2563eb;
-      margin-bottom: 0.5rem;
-    }
-
-    /* Collapsible sections - clean minimal design */
-    details.collapsible-section {
-      margin: 1.5rem 0;
-      border-left: 3px solid #e5e7eb;
-      padding-left: 1rem;
-    }
-    details.collapsible-section summary {
-      padding: 0.5rem 0;
-      cursor: pointer;
-      color: #4b5563;
-      list-style: none;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.95rem;
-    }
-    details.collapsible-section summary::-webkit-details-marker {
-      display: none;
-    }
-    details.collapsible-section summary::before {
-      content: "+";
-      font-weight: 600;
-      font-size: 1rem;
-      color: #6b7280;
-      width: 1rem;
-      flex-shrink: 0;
-    }
-    details.collapsible-section[open] summary::before {
-      content: "\2212";
-    }
-    details.collapsible-section summary:hover {
-      color: #1f2937;
-    }
-    details.collapsible-section .collapsible-content-inner {
-      padding: 0.75rem 0 0.5rem 1.5rem;
-      color: #374151;
-    }
-
-    .results-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 1rem 0;
-      font-size: 0.85rem;
-    }
-    .results-table th, .results-table td {
-      border: 1px solid #dee2e6;
-      padding: 0.4rem 0.6rem;
-      text-align: center;
-    }
-    .results-table th {
-      background: #f8f9fa;
-      font-weight: 600;
-    }
-    .results-table .highlight {
-      font-weight: bold;
-      color: #198754;
-    }
-
-    .table-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-      margin: 1rem 0;
-    }
-    .table-row .table-cell {
-      flex: 1;
-      min-width: 280px;
-    }
-    .table-row .table-cell .results-table {
-      margin: 0;
-    }
-
-    .key-insight {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 1.5rem;
-      border-radius: 8px;
-      margin: 1.5rem 0;
-    }
-    .key-insight strong {
-      color: #ffd700;
-    }
-
-    .takeaway-box {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 1.5rem;
-      border-radius: 8px;
-      margin: 1.5rem 0;
-    }
-    .takeaway-box strong {
-      color: #ffd700;
-    }
-
-    .section-content {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .two-column {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-    }
-    @media (max-width: 768px) {
-      .two-column {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .figure-container {
-      text-align: center;
-      margin: 2rem 0;
-    }
-    .figure-container img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .figure-container .caption {
-      margin-top: 1rem;
-      color: #666;
-      font-size: 0.9rem;
-    }
-  </style>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="static/css/style.css">
+  <script defer src="static/js/main.js"></script>
 </head>
 <body>
 
-  <!-- Scroll to Top Button -->
-  <button class="scroll-to-top" onclick="scrollToTop()" title="Scroll to top" aria-label="Scroll to top">
-    <i class="fas fa-chevron-up"></i>
-  </button>
-
-  <main id="main-content">
-  <section class="hero" style="padding: 1.5rem 0 1rem 0;">
-    <div class="hero-body" style="padding: 1rem 1.5rem;">
-      <div class="container is-max-desktop">
-        <div class="columns is-centered">
-          <div class="column has-text-centered">
-            <h1 class="title is-2 publication-title" style="margin-bottom: 0.75rem;">DUEL: Exact Likelihood for Masked Diffusion via Deterministic Unmasking</h1>
-            <div class="is-size-5 publication-authors" style="margin-bottom: 0.25rem;">
-              <span class="author-block"><a href="https://giladturok.github.io" target="_blank">Gilad Turok</a>,</span>
-              <span class="author-block"><a href="https://www.cs.cornell.edu/~cdesa/" target="_blank">Chris De Sa</a>,</span>
-              <span class="author-block"><a href="https://www.cs.cornell.edu/~kuleshov/" target="_blank">Volodymyr Kuleshov</a></span>
-            </div>
-            <div class="is-size-6 publication-authors" style="margin-bottom: 0.75rem;">
-              <span class="author-block">Cornell University</span>
-            </div>
-            <div class="publication-links">
-              <span class="link-block">
-                <a href="https://arxiv.org/pdf/2603.01367" target="_blank" class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon"><i class="fas fa-file-pdf"></i></span>
-                  <span>Paper</span>
-                </a>
-              </span>
-              <span class="link-block">
-                <a href="https://github.com/kuleshov-group/duel" target="_blank" class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon"><i class="fab fa-github"></i></span>
-                  <span>Code</span>
-                </a>
-              </span>
-              <span class="link-block">
-                <a href="https://arxiv.org/abs/2603.01367" target="_blank" class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon"><i class="ai ai-arxiv"></i></span>
-                  <span>arXiv</span>
-                </a>
-              </span>
-            </div>
-            <!-- TL;DR -->
-            <div class="tldr-box" style="margin-top: 1.25rem; padding: 0.75rem 1.25rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: inline-block;">
-              <p style="margin: 0; color: white; font-size: 0.95rem;">
-                <strong style="color: #ffd700;">TL;DR:</strong> We show MDM samplers admit <em>proper</em> likelihood evaluation&mdash;exact (not a bound) and under the test-time distribution&mdash;revealing MDMs are much better than the ELBO suggests, closing up to 82% of the gap with autoregressive models.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-
-<!-- Paper abstract -->
-<section class="section hero is-light" style="padding: 1.5rem 1.5rem;">
-  <div class="container is-max-desktop">
-    <div class="columns is-centered has-text-centered">
-      <div class="column is-four-fifths">
-        <h2 class="title is-4">Abstract</h2>
-        <div class="content has-text-justified" style="font-size: 0.92rem; line-height: 1.6;">
-          <p>
-            Masked diffusion models (MDMs) generate text by iteratively selecting positions to unmask and then predicting tokens at those positions. Yet MDMs lack proper likelihood evaluation: the evidence lower bound (ELBO) is not only a loose bound on log-likelihood, but, as we show, is also computed under the training distribution rather than the test-time distribution. We resolve this within our <strong>DUEL</strong> framework, which unifies leading MDM sampling strategies that employ <em>deterministic</em> position selection. We prove that DUEL samplers admit <strong>exact likelihood computation under the test-time distribution</strong>&mdash;giving MDMs <em>proper</em> likelihood, and hence proper perplexity, for the first time. This proper perplexity is the natural analogue of autoregressive perplexity and lets us revisit key questions about MDMs. <strong>MDMs are substantially better than previously thought</strong>: the MDM&ndash;autoregressive perplexity gap shrinks by up to 32% on in-domain data and 82% on zero-shot benchmarks. DUEL enables the first principled comparison of fast, parallel samplers across compute budgets&mdash;an analysis impossible with the ELBO and unreliable with generative perplexity&mdash;identifying a strong default method. Finally, oracle search over position orderings reveals MDMs can far surpass autoregressive models&mdash;achieving 36.47 vs. 52.11 perplexity on AG News&mdash;demonstrating the ceiling of MDM performance has not yet been reached.
-          </p>
-        </div>
-      </div>
-    </div>
+<header class="masthead">
+  <h1><span class="name">Duel</span>: Exact Likelihood Reshapes Masked<br class="br-wide"> Diffusion Scaling Laws and Beyond</h1>
+  <div class="authors">
+    <span class="author"><a href="https://giladturok.github.io">Gilad Turok</a></span>
+    <span class="author"><a href="https://yair-schiff.github.io">Yair Schiff</a></span>
+    <span class="author"><a href="https://www.cs.cornell.edu/~cdesa/">Chris De Sa</a><sup>*</sup></span>
+    <span class="author"><a href="https://www.cs.cornell.edu/~kuleshov/">Volodymyr Kuleshov</a><sup>*</sup></span>
   </div>
-</section>
-<!-- End paper abstract -->
+  <div class="affil">Cornell University &nbsp;&middot;&nbsp; <sup>*</sup>joint senior authorship</div>
+  <div class="buttons">
+    <a class="btn" href="https://arxiv.org/abs/2603.01367">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 13h8v2H8v-2zm0 4h8v2H8v-2zm0-8h3v2H8V9z"/></svg>
+      arXiv
+    </a>
+    <a class="btn" href="https://github.com/kuleshov-group/duel">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.25-1.28-5.25-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+      Code
+    </a>
+    <a class="btn" href="#cite">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17h3l2-4V7H5v6h3l-2 4zm8 0h3l2-4V7h-6v6h3l-2 4z"/></svg>
+      BibTeX
+    </a>
+  </div>
+</header>
 
+<nav class="toc" aria-label="Contents">
+  <div class="toc-title">Contents</div>
+  <ol>
+    <li><a href="#abstract"><span class="n">&mdash;</span>Abstract</a></li>
+    <li><a href="#background"><span class="n">1</span>Background</a></li>
+    <li><a href="#mdm"><span class="n">&nbsp;&nbsp;1.1</span>Masked diffusion</a></li>
+    <li><a href="#aoarm"><span class="n">&nbsp;&nbsp;1.2</span>Any-order view</a></li>
+    <li><a href="#elbo-problems"><span class="n">&nbsp;&nbsp;1.3</span>ELBO problems</a></li>
+    <li><a href="#duel"><span class="n">2</span>DUEL</a></li>
+    <li><a href="#results"><span class="n">3</span>Results</a></li>
+    <li><a href="#ppl"><span class="n">&nbsp;&nbsp;3.1</span>Perplexity</a></li>
+    <li><a href="#scaling"><span class="n">&nbsp;&nbsp;3.2</span>Scaling laws</a></li>
+    <li><a href="#mc"><span class="n">&nbsp;&nbsp;3.3</span>Multiple choice</a></li>
+    <li><a href="#samplers"><span class="n">&nbsp;&nbsp;3.4</span>Sampler selection</a></li>
+    <li><a href="#limits"><span class="n">4</span>Limitations</a></li>
+    <li><a href="#cite"><span class="n">&mdash;</span>Citation</a></li>
+  </ol>
+</nav>
 
-<!-- MDM Generation Section -->
-<section class="section">
-  <div class="container is-max-desktop">
-    <div class="section-content">
-      <h2 class="title is-3">How MDMs Generate Text</h2>
+<main>
 
-      <div class="content">
-        <p>
-          Masked diffusion models (MDMs) generate text by starting with a fully masked sequence and iteratively revealing tokens <a href="https://arxiv.org/abs/2406.07524" class="citation" target="_blank">[Sahoo et al., 2024]</a>. At each step, two things happen:
-        </p>
+<div class="col">
 
-        <ul>
-          <li><strong style="color: #2563eb;">Position selection:</strong> A policy $\pi$ outputs a distribution over masked positions; one is chosen to reveal.</li>
-          <li><strong style="color: #7c3aed;">Token prediction:</strong> A denoising network $x_\theta$ outputs logits; we define the <em>denoising distribution</em> $p_\theta(v \mid \mathbf{z}) = P_\ell[v]$ where $\mathbf{P} = \mathrm{softmax}(x_\theta(\mathbf{z}))$ is the token probability matrix. A token is sampled from this distribution for the selected position.</li>
-        </ul>
-
-        <p>
-          This repeats until all positions are revealed. The figure below shows one step:
-        </p>
-
-        <!-- Custom MDM Generation Figure with histograms -->
-        <div class="figure-container" style="margin: 2rem 0;">
-          <svg viewBox="0 0 650 140" style="width: 100%; min-height: 180px; height: auto; font-family: 'Inter', sans-serif;">
-            <!-- Arrowhead definition -->
-            <defs>
-              <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-                <polygon points="0 0, 8 3, 0 6" fill="#9ca3af"/>
-              </marker>
-            </defs>
-
-            <!-- Current sequence: 4 tokens, 2 revealed, 2 masked -->
-            <g transform="translate(10, 30)">
-              <text x="35" y="-12" font-size="11" font-weight="600" fill="#333">Current Sequence</text>
-              <rect x="0" y="0" width="32" height="32" rx="3" fill="#f0fdf4" stroke="#22c55e" stroke-width="1.5"/>
-              <text x="16" y="21" font-size="11" fill="#166534" text-anchor="middle">the</text>
-              <rect x="36" y="0" width="32" height="32" rx="3" fill="#e5e7eb" stroke="#9ca3af" stroke-width="1.5"/>
-              <text x="52" y="21" font-size="11" fill="#6b7280" text-anchor="middle">[M]</text>
-              <rect x="72" y="0" width="32" height="32" rx="3" fill="#f0fdf4" stroke="#22c55e" stroke-width="1.5"/>
-              <text x="88" y="21" font-size="11" fill="#166534" text-anchor="middle">cat</text>
-              <rect x="108" y="0" width="32" height="32" rx="3" fill="#e5e7eb" stroke="#9ca3af" stroke-width="1.5"/>
-              <text x="124" y="21" font-size="11" fill="#6b7280" text-anchor="middle">[M]</text>
-              <text x="55" y="50" font-size="9" fill="#666" text-anchor="middle">pos: 1 &nbsp; 2 &nbsp; 3 &nbsp; 4</text>
-            </g>
-
-            <!-- Arrow -->
-            <path d="M 155 46 L 175 46" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
-
-            <!-- Position selection histogram -->
-            <g transform="translate(185, 15)">
-              <text x="20" y="-2" font-size="11" font-weight="600" fill="#2563eb">Position Selection $\pi$</text>
-              <!-- Axis -->
-              <line x1="0" y1="60" x2="90" y2="60" stroke="#ccc" stroke-width="1"/>
-              <!-- Bars - only positions 2 and 4 have probability -->
-              <rect x="5" y="55" width="15" height="5" fill="#e5e7eb"/>
-              <rect x="25" y="20" width="15" height="40" fill="#2563eb"/>
-              <rect x="45" y="55" width="15" height="5" fill="#e5e7eb"/>
-              <rect x="65" y="20" width="15" height="40" fill="#dbeafe" stroke="#2563eb" stroke-width="1"/>
-              <!-- Labels -->
-              <text x="12" y="72" font-size="8" fill="#666" text-anchor="middle">1</text>
-              <text x="32" y="72" font-size="8" fill="#2563eb" text-anchor="middle" font-weight="600">2</text>
-              <text x="52" y="72" font-size="8" fill="#666" text-anchor="middle">3</text>
-              <text x="72" y="72" font-size="8" fill="#666" text-anchor="middle">4</text>
-              <text x="45" y="85" font-size="8" fill="#2563eb" text-anchor="middle">→ select pos 2</text>
-            </g>
-
-            <!-- Arrow -->
-            <path d="M 285 46 L 305 46" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
-
-            <!-- Token prediction histogram -->
-            <g transform="translate(315, 15)">
-              <text x="35" y="-2" font-size="11" font-weight="600" fill="#7c3aed">Token Prediction $x_\theta$</text>
-              <!-- Axis -->
-              <line x1="0" y1="60" x2="120" y2="60" stroke="#ccc" stroke-width="1"/>
-              <!-- Bars - decreasing probabilities -->
-              <rect x="5" y="10" width="18" height="50" fill="#7c3aed"/>
-              <rect x="28" y="30" width="18" height="30" fill="#ede9fe" stroke="#7c3aed" stroke-width="1"/>
-              <rect x="51" y="42" width="18" height="18" fill="#ede9fe" stroke="#7c3aed" stroke-width="1"/>
-              <rect x="74" y="50" width="18" height="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="1"/>
-              <rect x="97" y="55" width="18" height="5" fill="#ede9fe" stroke="#7c3aed" stroke-width="1"/>
-              <!-- Labels -->
-              <text x="14" y="72" font-size="7" fill="#7c3aed" text-anchor="middle" font-weight="600">big</text>
-              <text x="37" y="72" font-size="7" fill="#666" text-anchor="middle">fat</text>
-              <text x="60" y="72" font-size="7" fill="#666" text-anchor="middle">old</text>
-              <text x="83" y="72" font-size="7" fill="#666" text-anchor="middle">...</text>
-              <text x="106" y="72" font-size="7" fill="#666" text-anchor="middle">...</text>
-              <text x="60" y="85" font-size="8" fill="#7c3aed" text-anchor="middle">→ sample "big"</text>
-            </g>
-
-            <!-- Arrow -->
-            <path d="M 445 46 L 465 46" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
-
-            <!-- Result sequence -->
-            <g transform="translate(475, 30)">
-              <text x="35" y="-12" font-size="11" font-weight="600" fill="#166534">Updated Sequence</text>
-              <rect x="0" y="0" width="32" height="32" rx="3" fill="#f0fdf4" stroke="#22c55e" stroke-width="1.5"/>
-              <text x="16" y="21" font-size="11" fill="#166534" text-anchor="middle">the</text>
-              <rect x="36" y="0" width="32" height="32" rx="3" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
-              <text x="52" y="21" font-size="11" fill="#7c3aed" text-anchor="middle" font-weight="600">big</text>
-              <rect x="72" y="0" width="32" height="32" rx="3" fill="#f0fdf4" stroke="#22c55e" stroke-width="1.5"/>
-              <text x="88" y="21" font-size="11" fill="#166534" text-anchor="middle">cat</text>
-              <rect x="108" y="0" width="32" height="32" rx="3" fill="#e5e7eb" stroke="#9ca3af" stroke-width="1.5"/>
-              <text x="124" y="21" font-size="11" fill="#6b7280" text-anchor="middle">[M]</text>
-              <text x="55" y="50" font-size="9" fill="#666" text-anchor="middle">repeat until done</text>
-            </g>
-          </svg>
-          <p class="caption"><strong>Figure:</strong> One step of MDM generation. <span style="color: #2563eb;">Position selection</span> chooses among masked positions (here, equal probability for positions 2 and 4). <span style="color: #7c3aed;">Token prediction</span> samples a token from the vocabulary distribution at the selected position.</p>
-        </div>
-      </div>
-    </div>
+<!-- ============================== ABSTRACT ============================== -->
+<section id="abstract">
+  <div class="abstract">
+  <div class="abstract-label">Abstract</div>
+  <p>
+    Masked diffusion models (MDMs) are trained to predict tokens in every order but generate in one.
+    As such, MDM likelihood is an intractable sum over all orders.
+    The evidence lower bound (ELBO) is used as a proxy for likelihood, but it is a <em>loose bound</em> and
+    assumes positions are unmasked uniformly at <em>random</em>.
+    Frontier MDMs, however, select positions with <em>deterministic</em> rules such as confidence.
+    To resolve this mismatch we introduce <span class="sc">Duel</span>, a framework that unifies common
+    deterministic MDM samplers.
+    <strong><span class="sc">Duel</span> allows for likelihood computation that is both <em>exact</em> and
+    under the sampler that is <em>actually used</em></strong> during generation.
+    <span class="sc">Duel</span> is a simple plug-and-play algorithm applicable to any pretrained MDM with no
+    retraining.
+    To compute the likelihood of a text sequence, simply replay generation, reveal the true tokens instead of
+    sampled ones, and sum their log-probabilities.
+    Evaluating with <span class="sc">Duel</span> instead of the ELBO changes what we conclude about MDMs.
+    The perplexity gap between MDMs and autoregressive (AR) models shrinks by up to 32% in-domain and 82%
+    zero-shot.
+    In scaling laws, the reported 16&times; MDM&ndash;AR compute gap falls to 9&times; under
+    <span class="sc">Duel</span>, revealing more than &#8531; is an evaluation artifact.
+    Scoring multiple-choice answers with likelihood via <span class="sc">Duel</span> instead of the ELBO
+    improves LLaDA-8B accuracy on all six tasks, by up to 9.7 points.
+    <span class="sc">Duel</span> also selects samplers correctly: it matches a gold-standard LLM judge on
+    <em>every</em> decided comparison, which generative perplexity and MAUVE fail to do.
+    <span class="sc">Duel</span> reveals that MDMs are ultimately more competitive with AR models than the
+    ELBO initially suggests.
+  </p>
   </div>
 </section>
 
+<!-- ============================== 1. BACKGROUND ============================== -->
+<section id="background">
+  <h2><span class="n">01</span>Background</h2>
 
-<!-- Deterministic Position Selection Section -->
-<section class="section hero is-light">
-  <div class="container is-max-desktop">
-    <div class="section-content">
-      <h2 class="title is-3">Deterministic Position Selection</h2>
-
-      <div class="content">
-        <p>
-          The position selection policy $\pi$ can be random or deterministic. <strong>Nearly all leading MDM sampling strategies use deterministic selection</strong>&mdash;a fixed rule that maps the current sequence state to a set of positions, with no randomness involved. This includes the sampling strategies used by most fast samplers and state-of-the-art MDMs (e.g. LLaDA).
-        </p>
-
-        <p>
-          We call such a rule an <strong>unmasking rule</strong> $F$. Given a partially-revealed sequence $\mathbf{z}$, the rule $F(\mathbf{z})$ returns a non-empty subset of masked positions to unmask:
-        </p>
-
-        <p style="text-align: center; font-size: 1.1rem; margin: 1rem 0;">
-          $\emptyset \neq F(\mathbf{z}) \subseteq \mathcal{M}(\mathbf{z})$
-        </p>
-
-        <p>
-          Since the token probabilities $\mathbf{P} = \mathrm{softmax}(x_\theta(\mathbf{z}))$ are deterministic functions of $\mathbf{z}$, rules depending on $\mathbf{P}$ (like greedy confidence) are valid.
-        </p>
-
-        <!-- Collapsible Common Unmasking Rules -->
-        <details class="collapsible-section">
-          <summary><span><strong>Common Unmasking Rules &mdash; Instantiations from the Literature</strong></span></summary>
-          <div class="collapsible-content-inner">
-            <p style="margin-bottom: 0.75rem; font-size: 0.9rem; color: #666;">Let $\mathcal{M}(\mathbf{z})$ denote masked positions. $P_\ell^{(1)}$ and $P_\ell^{(2)}$ are the top-two token probabilities at position $\ell$.</p>
-            <ul style="margin: 0;">
-              <li><strong>Left-to-Right:</strong> Select the $k$ leftmost masked positions. Recovers autoregressive generation when $k=1$.</li>
-              <li><strong>Greedy Confidence</strong> <a href="https://arxiv.org/abs/2502.09992" class="citation" target="_blank">[Nie et al., 2025]</a>: Select $k$ positions with highest $P_\ell^{(1)}$. Used by LLaDA.</li>
-              <li><strong>Probability Margin</strong> <a href="https://arxiv.org/abs/2502.06768" class="citation" target="_blank">[Kim et al., 2025]</a>: Select $k$ positions with highest gap $P_\ell^{(1)} - P_\ell^{(2)}$.</li>
-              <li><strong>Confidence Threshold</strong> <a href="https://arxiv.org/abs/2505.22618" class="citation" target="_blank">[Wu et al., 2025]</a>: Select all positions where $P_\ell^{(1)} \geq \mu$. Enables adaptive parallelism.</li>
-            </ul>
-          </div>
-        </details>
-
-      </div>
-    </div>
+  <h3 id="mdm"><span class="n">1.1</span>Masked diffusion models</h3>
+  <p>
+    For a sequence $\bx = (x^1, \dots, x^L)$, $\rev{S}$ denotes its tokens at positions $S$, with the rest masked.
+    The <strong>forward process</strong> masks each token independently with probability $1-\alpha_t$, for noise schedule $\alpha_t$. A
+    <strong>denoiser</strong> reverses it, predicting $p_\theta(x^\ell \mid \rev{S})$ at every masked position.
+    The likelihood $p_\theta(\bx) = \sum_{\bz_{0:1}} p_\theta(\bx, \bz_{0:1})$ sums over all latent trajectories
+    and is intractable, so MDMs are trained with the evidence lower bound (ELBO):
+  </p>
+  <div class="eq">
+    \[
+      -\log p_\theta(\bx) \;\le\; \E_{t,\,\bz_t}\Big[\, w_t \sum_{\ell \notin S(\bz_t)} -\log p_\theta\big(x^\ell \mid \rev{S(\bz_t)}\big) \Big],
+      \qquad w_t = \frac{-\alpha_t'}{1-\alpha_t}
+      \tag{1}
+    \]
   </div>
+
+  <!-- ---------- 1.2 AO-ARM ---------- -->
+  <h3 id="aoarm"><span class="n">1.2</span>Masked diffusion as any-order autoregression</h3>
+  <p>
+    An alternative view treats MDMs as <strong>any-order autoregressive models</strong> (AO-ARMs), a class that
+    originates in order-agnostic NADE
+    (<a class="cite" href="https://arxiv.org/abs/1310.1757">Uria et al., 2014</a>) and is equivalent to MDMs
+    (<a class="cite" href="https://arxiv.org/abs/2110.02037">Hoogeboom et al., 2021</a>;
+    <a class="cite" href="https://arxiv.org/abs/2406.03736">Ou et al., 2024</a>;
+    <a class="cite" href="https://arxiv.org/abs/2502.06768">Kim et al., 2025a</a>). This view makes the unmasking order explicit.
+  </p>
+  <p>
+    Generation reveals tokens in some order, an ordered partition $\sigma = (\sigma_1, \dots, \sigma_T)$ of $[L]$.
+    At each step a policy $\pol$ selects positions and the denoiser $p_\theta$ predicts their tokens.
+  </p>
+  <figure>
+    <img src="static/images/mdm_generation_step.png" alt="One step of MDM generation: position selection chooses position 2, token prediction samples 'big'.">
+    <figcaption>
+      <strong>One MDM step.</strong> A policy $\pol$ selects a position; the denoiser $p_\theta$ predicts its token.
+    </figcaption>
+  </figure>
+  <p>The probability of generating $\bx$ along $\sigma$ factorizes into these two steps:</p>
+  <div class="eq">
+    \[
+      p_\theta(\bx, \sigma) \;=\; \prod_{t=1}^{T}\;
+        \underbrace{\pol\big(\sigma_t \mid \rev{\sigma_{&lt;t}}\big)}_{\text{position selection}}
+        \;\cdot\;
+        \underbrace{\prod_{\ell \in \sigma_t} p_\theta\big(x^\ell \mid \rev{\sigma_{&lt;t}}\big)}_{\text{token prediction}}
+      \tag{2}
+    \]
+  </div>
+  <p>
+    Summing over orders gives the likelihood $\ppol{\pol}(\bx) = \sum_\sigma p_\theta(\bx, \sigma)$, so
+    <strong>each policy defines a different distribution from the same denoiser</strong>. The diffusion ELBO
+    corresponds to the uniform policy $\punif$ and follows from Jensen's inequality:
+  </p>
+  <div class="eq">
+    \[
+      -\log \ppol{\punif}(\bx) \;\le\; \E_{\sigma \sim \mathrm{Unif}(S_L)} \Big[ \sum_{t=1}^{L} -\log p_\theta\big(x^{\sigma_t} \mid \rev{\sigma_{&lt;t}}\big) \Big]
+      \tag{3}
+    \]
+  </div>
+
+  <!-- ---------- 1.3 ELBO problems ---------- -->
+  <h3 id="elbo-problems"><span class="n">1.3</span>Problems with the ELBO</h3>
+  <p>Equation (3) has two problems.</p>
+  <div class="callout">
+    <ol class="problems">
+      <li><strong>It is only a bound.</strong> Jensen's inequality leaves a gap of unknown size, so the ELBO
+        overstates an MDM's perplexity.</li>
+      <li><strong>It scores the wrong sampler.</strong> It assumes positions are unmasked uniformly at random.
+        However, no open frontier MDM samples this way. LLaDA (<a class="cite" href="https://arxiv.org/abs/2502.09992">Nie et al., 2025</a>),
+        Dream (<a class="cite" href="https://arxiv.org/abs/2508.15487">Ye et al., 2025</a>),
+        LLaDA&nbsp;2.0 (<a class="cite" href="https://arxiv.org/abs/2512.15745">Bie et al., 2025</a>),
+        SDAR (<a class="cite" href="https://arxiv.org/abs/2510.06303">Cheng et al., 2025</a>) and
+        Nemotron-Diffusion (<a class="cite" href="https://arxiv.org/abs/2607.05722">Fu et al., 2026</a>) all choose positions
+        with deterministic rules such as confidence, because random orders are reported to produce worse
+        samples.</li>
+    </ol>
+  </div>
+  <p>
+    The ELBO therefore evaluates a model nobody deploys, and it cannot tell samplers apart.
+    Together they make MDMs look worse than they are.
+  </p>
 </section>
 
-
-<!-- DUEL Framework Section -->
-<section class="section">
-  <div class="container is-max-desktop">
-    <div class="section-content">
-      <h2 class="title is-3">The DUEL Framework</h2>
-
-      <div class="content">
-        <p>
-          A <strong>DUEL sampler</strong> combines a pretrained denoising network $x_\theta$ with an unmasking rule $F$. In practice, this is just a pretrained MDM together with a choice of how to sample from it.
-        </p>
-
-        <div class="definition-box">
-          <p class="def-title">Definition (DUEL Sampler)</p>
-          <p>
-            A <strong>DUEL sampler</strong> is a pair $(\color{#7c3aed}{x_\theta}, \color{#2563eb}{F})$ consisting of:
-          </p>
-          <ul style="margin: 0.5rem 0 0.5rem 1.5rem;">
-            <li><span style="color: #7c3aed;"><strong>Denoising network</strong></span> $x_\theta$: outputs token probabilities $\mathbf{P} = \mathrm{softmax}(x_\theta(\mathbf{z})) \in \Delta_V^L$</li>
-            <li><span style="color: #2563eb;"><strong>Deterministic unmasking rule</strong></span> $F$: selects which positions to reveal</li>
-          </ul>
-        </div>
-
-        <p>
-          The rule $F$ induces a <strong>deterministic unmasking policy</strong> $\pi^F$&mdash;it places all probability mass on the positions $F$ selects, with no randomness in position selection. Together, $(x_\theta, F)$ defines a complete generative procedure.
-        </p>
-
-        <p>
-          The sampling procedure is straightforward: start fully masked, repeatedly select positions via $F$ and sample tokens at those positions, until all positions are revealed.
-        </p>
-
-        <!-- Algorithm 1 -->
-        <div class="algorithm-box">
-          <p class="algo-title">Algorithm 1: DUEL Sampling</p>
-          <p style="margin: 0.15rem 0;"><span style="color: #0066cc; font-weight: bold;">Input:</span> <span style="color: #7c3aed;">denoising network $x_\theta$</span>, <span style="color: #2563eb;">unmasking rule $F$</span></p>
-          <p style="margin: 0.15rem 0;"><span style="color: #0066cc; font-weight: bold;">Output:</span> generated sequence $\mathbf{x}$</p>
-          <p style="margin: 0.15rem 0;">1: $\mathbf{z} \gets (\texttt{[M]}, \ldots, \texttt{[M]})$ <span style="color: #6c757d; font-style: italic;">// Start fully masked</span></p>
-          <p style="margin: 0.15rem 0;">2: <span style="color: #0066cc; font-weight: bold;">while</span> $\mathcal{M}(\mathbf{z}) \neq \emptyset$:</p>
-          <p style="margin: 0.15rem 0;">3: &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #7c3aed;">$\mathbf{P} \gets \mathrm{softmax}(x_\theta(\mathbf{z}))$</span> <span style="color: #6c757d; font-style: italic;">// Token probabilities</span></p>
-          <p style="margin: 0.15rem 0;">4: &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2563eb;">$\mathcal{I} \gets F(\mathbf{z})$</span> <span style="color: #6c757d; font-style: italic;">// Positions to unmask</span></p>
-          <p style="margin: 0.15rem 0;">5: &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #0066cc; font-weight: bold;">for</span> $\ell \in \mathcal{I}$:</p>
-          <p style="margin: 0.15rem 0;">6: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #0d6efd;">$x_\ell \sim \mathrm{Cat}(P_\ell)$</span> <span style="color: #6c757d; font-style: italic;">// Sample token</span></p>
-          <p style="margin: 0.15rem 0;">7: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$\mathbf{z}[\ell] \gets x_\ell$ <span style="color: #6c757d; font-style: italic;">// Reveal token</span></p>
-          <p style="margin: 0.15rem 0;">8: <span style="color: #0066cc; font-weight: bold;">return</span> $\mathbf{z}$</p>
-        </div>
-
-        <div class="key-insight">
-          <strong>Implicit Distribution:</strong> Algorithm 1 defines an <em>implicit</em> generative procedure&mdash;we can draw samples without writing down the induced distribution in closed form. Different unmasking rules $F$ yield different distributions, even with the same network $x_\theta$.
-        </div>
+<!-- ============================== 3. DUEL ============================== -->
+<section id="duel">
+  <h2><span class="n">02</span><span><span class="sc">Duel</span>: exact likelihood under deterministic unmasking</span></h2>
+  <p>
+    <span class="sc">Duel</span> fixes both problems with the ELBO by computing the exact likelihood under the
+    sampler that is actually used. To formalize this, note that frontier MDMs choose positions with a deterministic
+    <strong>unmasking rule</strong> $F$, which looks at the denoiser's predictions and returns the positions to
+    reveal next. Examples include left-to-right, greedy confidence, probability margin, confidence threshold and
+    KLASS.
+  </p>
+  <details class="more">
+    <summary>Show rule definitions</summary>
+    <div class="tbl narrow">
+      <div class="cap">
+        <strong>Common unmasking rules.</strong> $\mathcal M$ is the set of masked positions; $P^{(1)}_\ell$ and
+        $P^{(2)}_\ell$ are the top-two probabilities the denoiser assigns at position $\ell$; $k$ positions are
+        revealed per step.
       </div>
+      <table class="rules">
+        <thead><tr><th>Rule</th><th>Positions revealed, $F(\rev{S})$</th><th>Source</th></tr></thead>
+        <tbody>
+          <tr><td>Left-to-right</td><td>the $k$ leftmost $\ell \in \mathcal M$</td><td>AR decoding</td></tr>
+          <tr><td>Greedy confidence</td><td>$\mathrm{top}_k\, P^{(1)}_\ell$</td><td>LLaDA, Dream</td></tr>
+          <tr><td>Probability margin</td><td>$\mathrm{top}_k\, \big(P^{(1)}_\ell - P^{(2)}_\ell\big)$</td><td><a class="cite" href="https://arxiv.org/abs/2502.06768">Kim et al., 2025a</a></td></tr>
+          <tr><td>Confidence threshold</td><td>$\{\ell \in \mathcal M : P^{(1)}_\ell \ge \mu\}$</td><td><a class="cite" href="https://arxiv.org/abs/2505.22618">Fast-dLLM</a></td></tr>
+          <tr><td>KLASS</td><td>threshold + $\KL(\hat P_\ell \| P_\ell) {\le} \nu$</td><td><a class="cite" href="https://arxiv.org/abs/2511.05664">Kim et al., 2025b</a></td></tr>
+        </tbody>
+      </table>
     </div>
+  </details>
+
+  <p>Under a rule, the policy puts all of its mass on a single choice:</p>
+  <div class="eq">
+    \[
+      \pF\big(\sigma_t \mid \rev{\sigma_{&lt;t}}\big) \;=\; \mathbf 1\big[\sigma_t = F(\rev{\sigma_{&lt;t}})\big]
+      \tag{4}
+    \]
   </div>
-</section>
+  <p>Running $F$ on $\bx$ therefore gives a single order $\sigF(\bx)$, and the likelihood can be computed exactly:</p>
+  <div class="eq key">
+    <div class="eq-label">Theorem &middot; Exact likelihood</div>
+    \[
+      \log \ppol{\pF}(\bx) \;=\; \sum_{t=1}^{T} \sum_{\ell \in \sigF_t} \log p_\theta\big(x^\ell \mid \rev{\sigF_{&lt;t}}\big)
+      \tag{5}
+    \]
+  </div>
+  <p>
+    Plug (4) into the sum over orders $\ppol{\pol}(\bx) = \sum_\sigma p_\theta(\bx, \sigma)$. The indicator is zero for every order except
+    $\sigF(\bx)$, so <strong>a sum of more than $L!$ terms reduces to a single term</strong>:
+  </p>
+  <div class="eq">
+    \[
+      \ppol{\pF}(\bx)
+      = \sum_{\sigma} \prod_{t} \mathbf 1\big[\sigma_t = F(\rev{\sigma_{&lt;t}})\big] \prod_{\ell \in \sigma_t} p_\theta\big(x^\ell \mid \rev{\sigma_{&lt;t}}\big)
+      = \prod_{t} \prod_{\ell \in \sigF_t} p_\theta\big(x^\ell \mid \rev{\sigF_{&lt;t}}\big)
+    \]
+  </div>
+  <div class="callout good">
+    <ul>
+      <li><strong>Intuition:</strong> a deterministic sampler can produce a given text along only one path, so its
+        likelihood is the chain rule along that path.</li>
+      <li><strong>How:</strong> replay generation, but reveal the true tokens instead of sampling them, and add up
+        their log-probabilities.</li>
+      <li><strong>Properties:</strong> exact, with no Jensen gap, and computed under the sampler actually used.</li>
+      <li><strong>Cost:</strong> the same as generation, $\lceil L/k \rceil$ forward passes, with no retraining.</li>
+    </ul>
+  </div>
 
-
-<!-- AO-ARM Formulation Section -->
-<section class="section hero is-light">
-  <div class="container is-max-desktop">
-    <div class="section-content">
-      <h2 class="title is-3">Any-Order Autoregressive Formulation</h2>
-
-      <div class="content">
-        <p>
-          A DUEL sampler generates samples&mdash;but what distribution does it sample from? To make this explicit, we build on the <em>any-order autoregressive model</em> (AO-ARM) interpretation of MDMs. This formulation decomposes generation into <span style="color: #2563eb; font-weight: 500;">position-selection</span> and <span style="color: #7c3aed; font-weight: 500;">token-prediction</span> steps, allowing us to write down the joint probability of generating a sequence via any ordered partition.
-        </p>
-
-        <h4 class="title is-5">Ordered Partitions</h4>
-
-        <p>
-          To formalize the sequence of unmasking steps during generation, we introduce <strong>ordered partitions</strong>. An ordered partition $\sigma = (\sigma_1, \ldots, \sigma_T)$ is a tuple of non-empty subsets of $\{1, \ldots, L\}$ satisfying:
-        </p>
+  <details class="more">
+    <summary>Show algorithms: sampling vs. exact likelihood</summary>
+    <div class="algos wide">
+      <div class="algo">
+        <div class="algo-title"><span class="n">Algorithm 1</span><span class="sc">Duel</span> sampling</div>
         <ol>
-          <li><strong>Pairwise disjoint:</strong> $\sigma_s \cap \sigma_t = \emptyset$ for all $s \neq t$</li>
-          <li><strong>Exhaustive:</strong> $\sigma_1 \cup \cdots \cup \sigma_T = \{1, \ldots, L\}$</li>
+          <li class="req"><span><span class="kw">Require</span> denoiser $p_\theta$, rule $F$</span><span class="c"></span></li>
+          <li><span>$S \gets \emptyset$</span><span class="c">nothing revealed</span></li>
+          <li><span><span class="kw">while</span> masked tokens remain <span class="kw">do</span></span><span class="c"></span></li>
+          <li><span class="i1">$P \gets p_\theta(\cdot \mid \rev{S})$</span><span class="c">one forward pass</span></li>
+          <li><span class="i1">$I \gets F(\rev{S})$</span><span class="c">positions to reveal</span></li>
+          <li><span class="i1"><span class="kw">for</span> $\ell \in I$ <span class="kw">do</span></span><span class="c"></span></li>
+          <li class="hl-sample"><span class="i2">$x^\ell \sim \Cat(P_\ell)$</span><span class="c">sample a token</span></li>
+          <li><span class="i1">$S \gets S \cup I$</span><span class="c"></span></li>
+          <li><span><span class="kw">return</span> $\bx$</span><span class="c">a sample from $\ppol{\pF}$</span></li>
         </ol>
-        <p>
-          Each $\sigma_t$ records which positions are revealed at step $t$, and $T$ denotes the total number of steps.
-        </p>
-
-        <p>
-          Ordered partitions capture both sequential and parallel unmasking&mdash;a distinguishing feature of MDMs over ARMs:
-        </p>
-        <ul>
-          <li><strong>Sequential unmasking:</strong> Each $\sigma_t$ is a singleton ($|\sigma_t| = 1$), giving $T = L$ steps</li>
-          <li><strong>Parallel unmasking:</strong> Parts contain multiple positions, giving $T < L$ steps</li>
-        </ul>
-        <p>
-          We write $\mathbf{x}_{<\sigma_t}$ for the partial sequence where positions in $\sigma_1 \cup \cdots \cup \sigma_{t-1}$ are revealed and all others remain masked.
-        </p>
-
-        <!-- Visual for ordered partitions -->
-        <div style="margin: 1.5rem 0; text-align: center;">
-          <svg viewBox="0 0 550 100" style="max-width: 550px; height: auto; font-family: 'Inter', sans-serif;">
-            <!-- Sequential partition -->
-            <g transform="translate(10, 20)">
-              <text x="0" y="0" font-size="13" font-weight="600" fill="#2563eb">Sequential:</text>
-              <text x="0" y="22" font-size="12" fill="#333">$\sigma = (\{1\}, \{2\}, \{3\}, \{4\})$</text>
-              <rect x="180" y="-6" width="28" height="28" rx="4" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
-              <text x="194" y="13" font-size="12" fill="#2563eb" text-anchor="middle" font-weight="600">1</text>
-              <text x="216" y="13" font-size="14" fill="#666">→</text>
-              <rect x="230" y="-6" width="28" height="28" rx="4" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
-              <text x="244" y="13" font-size="12" fill="#2563eb" text-anchor="middle" font-weight="600">2</text>
-              <text x="266" y="13" font-size="14" fill="#666">→</text>
-              <rect x="280" y="-6" width="28" height="28" rx="4" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
-              <text x="294" y="13" font-size="12" fill="#2563eb" text-anchor="middle" font-weight="600">3</text>
-              <text x="316" y="13" font-size="14" fill="#666">→</text>
-              <rect x="330" y="-6" width="28" height="28" rx="4" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
-              <text x="344" y="13" font-size="12" fill="#2563eb" text-anchor="middle" font-weight="600">4</text>
-              <text x="380" y="13" font-size="11" fill="#666" font-style="italic">(T = 4 steps)</text>
-            </g>
-            <!-- Parallel partition -->
-            <g transform="translate(10, 70)">
-              <text x="0" y="0" font-size="13" font-weight="600" fill="#7c3aed">Parallel:</text>
-              <text x="0" y="22" font-size="12" fill="#333">$\sigma = (\{2, 4\}, \{1, 3\})$</text>
-              <rect x="180" y="-6" width="28" height="28" rx="4" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
-              <text x="194" y="13" font-size="12" fill="#7c3aed" text-anchor="middle" font-weight="600">2</text>
-              <rect x="213" y="-6" width="28" height="28" rx="4" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
-              <text x="227" y="13" font-size="12" fill="#7c3aed" text-anchor="middle" font-weight="600">4</text>
-              <text x="254" y="13" font-size="14" fill="#666">→</text>
-              <rect x="270" y="-6" width="28" height="28" rx="4" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
-              <text x="284" y="13" font-size="12" fill="#7c3aed" text-anchor="middle" font-weight="600">1</text>
-              <rect x="303" y="-6" width="28" height="28" rx="4" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
-              <text x="317" y="13" font-size="12" fill="#7c3aed" text-anchor="middle" font-weight="600">3</text>
-              <text x="355" y="13" font-size="11" fill="#666" font-style="italic">(T = 2 steps)</text>
-            </g>
-          </svg>
-          <p class="caption" style="margin-top: 0.5rem;"><strong>Figure:</strong> Ordered partitions for a length-4 sequence. Sequential unmasking reveals one position at a time; parallel unmasking reveals multiple positions per step.</p>
-        </div>
-
-        <h4 class="title is-5">The Induced Distribution</h4>
-
-        <p>
-          The AO-ARM formulation decomposes generation into <span style="color: #2563eb;">position-selection</span> and <span style="color: #7c3aed;">token-prediction</span> steps. The joint probability $p_\theta(\mathbf{x}, \sigma)$ measures the probability that sequence $\mathbf{x}$ was generated via a specific unmasking trajectory $\sigma$. To obtain the data likelihood, we marginalize (sum) over all possible ordered partitions:
-        </p>
-
-        <p style="text-align: center; font-size: 1.1rem; margin: 1rem 0;">
-          $p_\theta(\mathbf{x}) = \sum_{\sigma} p_\theta(\mathbf{x}, \sigma)$
-        </p>
-
-        <p>
-          This defines the distribution induced by <em>any</em> unmasking policy $\pi$:
-        </p>
-
-        <div class="definition-box">
-          <p class="def-title"><strong>Induced Distribution</strong></p>
-          $$p_\theta^{\pi}(\mathbf{x}) = \sum_{\sigma} \prod_{t=1}^{T} \color{#2563eb}{\pi(\sigma_t \mid \mathbf{x}_{<\sigma_t})} \cdot \color{#7c3aed}{\prod_{\ell \in \sigma_t} p_\theta(x^{(\ell)} \mid \mathbf{x}_{<\sigma_t})}$$
-          <p style="margin-top: 0.5rem; font-size: 0.85rem; color: #666;">
-            The sum ranges over all ordered partitions $\sigma$, each corresponding to a different generation trajectory. This sum has super-exponentially many terms ($\geq L!$ for sequential unmasking alone).
-          </p>
-        </div>
+      </div>
+      <div class="algo">
+        <div class="algo-title"><span class="n">Algorithm 2</span><span class="sc">Duel</span> exact log-likelihood</div>
+        <ol>
+          <li class="req"><span><span class="kw">Require</span> sequence $\bx$, denoiser $p_\theta$, rule $F$</span><span class="c"></span></li>
+          <li><span>$S \gets \emptyset,\ \mathit{ll} \gets 0$</span><span class="c">nothing revealed</span></li>
+          <li><span><span class="kw">while</span> masked tokens remain <span class="kw">do</span></span><span class="c"></span></li>
+          <li><span class="i1">$P \gets p_\theta(\cdot \mid \rev{S})$</span><span class="c">one forward pass</span></li>
+          <li><span class="i1">$I \gets F(\rev{S})$</span><span class="c">same rule, same order</span></li>
+          <li><span class="i1"><span class="kw">for</span> $\ell \in I$ <span class="kw">do</span></span><span class="c"></span></li>
+          <li class="hl-score"><span class="i2">$\mathit{ll} \mathrel{+}= \log P_\ell[x^\ell]$</span><span class="c">score the truth</span></li>
+          <li><span class="i1">$S \gets S \cup I$</span><span class="c"></span></li>
+          <li><span><span class="kw">return</span> $\mathit{ll}$</span><span class="c">$\log \ppol{\pF}(\bx)$, exact</span></li>
+        </ol>
       </div>
     </div>
-  </div>
+    <figcaption style="margin-bottom:0">
+      <strong>Sampling and scoring are the same loop</strong>; only the highlighted line differs.
+    </figcaption>
+  </details>
 </section>
 
+<!-- ============================== 4. RESULTS ============================== -->
+<section id="results">
+  <h2><span class="n">03</span>Results</h2>
+  <p>
+    Throughout, <span class="elbo-c">ELBO</span> values are bounds under the uniform policy (marked $\le$) and
+    <span class="duel-c"><span class="sc">Duel</span></span> values are exact under the sampler's own policy $\pF$.
+    The models are the same in both cases; only the evaluation changes.
+  </p>
 
-<!-- Exact Likelihood Section -->
-<section class="section">
-  <div class="container is-max-desktop">
-    <div class="section-content">
-      <h2 class="title is-3">Proper Likelihood Evaluation</h2>
-
-      <div class="content">
-        <p>
-          DUEL delivers <em>proper</em> likelihood evaluation for MDMs: the likelihood is <strong>exact</strong> (not a lower bound) and computed under the <strong>test-time distribution</strong> (not the training distribution). Here we show why this is possible.
-        </p>
-
-        <p>
-          Computing the induced distribution directly appears intractable&mdash;the summation is over all unmasking orders $\sigma$ (with $ \geq L!$ terms) where each requires a separate neural network evaluation. However, <strong>a deterministic rule $F$ collapses the sum to a single term</strong>:
-        </p>
-
-        <ul>
-          <li>Given any partial sequence, $F$ outputs a <em>unique</em> set of positions&mdash;there is no randomness</li>
-          <li>Any ordered partition that deviates from what $F$ would select receives <em>zero probability</em> under $\pi^F$</li>
-          <li>Exactly one ordered partition $\sigma^*$ is consistent with the policy</li>
-        </ul>
-
-        <div class="theorem-box">
-          <p class="theorem-title"><strong>Theorem (DUEL Exact Likelihood)</strong></p>
-          <p>
-            For a DUEL sampler $(x_\theta, F)$, the log-likelihood is <strong>exact</strong> (not a bound) and computed under the <strong>test-time distribution</strong> $p_\theta^{\pi^F}$:
-          </p>
-          $$\log p_\theta^{\pi^F}(\mathbf{x}) = \sum_{t=1}^{T} \sum_{\ell \in \sigma^*_t} \log p_\theta(x^{(\ell)} \mid \mathbf{x}_{<\sigma^*_t})$$
-          <p style="margin-top: 0.5rem;">
-            where $\sigma^* = (\sigma^*_1, \ldots, \sigma^*_T)$ is the <em>unique</em> ordered partition satisfying $\sigma^*_t = F(\mathbf{x}_{<\sigma^*_t})$ at each step&mdash;the partition the sampler would produce when generating $\mathbf{x}$.
-          </p>
-        </div>
-
-        <p>
-          <strong>Likelihood follows generation:</strong> The algorithm mirrors sampling&mdash;simulate the unmasking process, but instead of sampling tokens, reveal the <em>true</em> tokens from $\mathbf{x}$ and accumulate their log-probabilities. This is the crux of DUEL: the likelihood computation follows the same path as generation.
-        </p>
-
-        <!-- Algorithm 2 -->
-        <div class="algorithm-box">
-          <p class="algo-title">Algorithm 2: DUEL Exact Likelihood</p>
-          <p style="margin: 0.15rem 0;"><span style="color: #0066cc; font-weight: bold;">Input:</span> sequence $\mathbf{x}$, <span style="color: #7c3aed;">denoising network $x_\theta$</span>, <span style="color: #2563eb;">unmasking rule $F$</span></p>
-          <p style="margin: 0.15rem 0;"><span style="color: #0066cc; font-weight: bold;">Output:</span> log-likelihood $\log p_\theta^{\pi^F}(\mathbf{x})$</p>
-          <p style="margin: 0.15rem 0;">1: $\mathbf{z} \gets (\texttt{[M]}, \ldots, \texttt{[M]})$ <span style="color: #6c757d; font-style: italic;">// Start fully masked</span></p>
-          <p style="margin: 0.15rem 0;">2: <span style="color: #198754;">$\texttt{ll} \gets 0$</span> <span style="color: #6c757d; font-style: italic;">// Initialize log-likelihood</span></p>
-          <p style="margin: 0.15rem 0;">3: <span style="color: #0066cc; font-weight: bold;">while</span> $\mathcal{M}(\mathbf{z}) \neq \emptyset$:</p>
-          <p style="margin: 0.15rem 0;">4: &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #7c3aed;">$\mathbf{P} \gets \mathrm{softmax}(x_\theta(\mathbf{z}))$</span> <span style="color: #6c757d; font-style: italic;">// Token probabilities</span></p>
-          <p style="margin: 0.15rem 0;">5: &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2563eb;">$\mathcal{I} \gets F(\mathbf{z})$</span> <span style="color: #6c757d; font-style: italic;">// Positions to unmask</span></p>
-          <p style="margin: 0.15rem 0;">6: &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #0066cc; font-weight: bold;">for</span> $\ell \in \mathcal{I}$:</p>
-          <p style="margin: 0.15rem 0;">7: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #198754;">$\texttt{ll} \mathrel{+}= \log P_\ell[x_\ell]$</span> <span style="color: #6c757d; font-style: italic;">// Accumulate log-prob</span></p>
-          <p style="margin: 0.15rem 0;">8: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$\mathbf{z}[\ell] \gets x_\ell$ <span style="color: #6c757d; font-style: italic;">// Reveal true token</span></p>
-          <p style="margin: 0.15rem 0;">9: <span style="color: #0066cc; font-weight: bold;">return</span> $\texttt{ll}$</p>
-        </div>
-      </div>
-    </div>
+  <!-- ---------- 4.1 Perplexity ---------- -->
+  <h3 id="ppl"><span class="n">3.1</span>Perplexity <span class="claim">&mdash; DUEL closes up to 32% of the MDM&ndash;AR gap in-domain, 82% zero-shot</span></h3>
+  <p>
+    We compare SEDD (<a class="cite" href="https://arxiv.org/abs/2310.16834">Lou et al., 2024</a>), MDLM (<a class="cite" href="https://arxiv.org/abs/2406.07524">Sahoo et al., 2024</a>) and BD3-LM (<a class="cite" href="https://arxiv.org/abs/2503.09573">Arriola et al., 2025</a>) with an AR baseline of similar size trained on comparable data.
+    <strong>Gap closed</strong> is the fraction of the ELBO's MDM&ndash;AR perplexity gap that disappears under
+    <span class="sc">Duel</span>.
+  </p>
+<div class="wide tables two">
+  <div class="tbl">
+    <div class="cap"><strong>(a) Held-out OpenWebText perplexity.</strong> AR baseline: 17.54.</div>
+    <table>
+      <thead><tr><th>Model</th><th class="elbo">ELBO <span class="arrow">&darr;</span></th><th class="duel"><span class="sc">Duel</span> <span class="arrow">&darr;</span></th><th>Gap closed <span class="arrow">&uarr;</span></th></tr></thead>
+      <tbody>
+        <tr><td>SEDD</td><td class="elbo"><span class="le">&le;</span>24.10</td><td class="duel win">22.58</td><td>23.2%</td></tr>
+        <tr><td>MDLM</td><td class="elbo"><span class="le">&le;</span>22.98</td><td class="duel win">21.86</td><td>20.6%</td></tr>
+        <tr><td>BD3-LM $L'{=}4$</td><td class="elbo"><span class="le">&le;</span>20.73</td><td class="duel win">19.73</td><td>31.3%</td></tr>
+        <tr><td>BD3-LM $L'{=}8$</td><td class="elbo"><span class="le">&le;</span>21.68</td><td class="duel win">20.37</td><td>31.6%</td></tr>
+        <tr><td>BD3-LM $L'{=}16$</td><td class="elbo"><span class="le">&le;</span>22.27</td><td class="duel win">20.76</td><td>31.9%</td></tr>
+      </tbody>
+    </table>
   </div>
-</section>
-
-
-<!-- Evaluation Metrics Section -->
-<section class="section hero is-light">
-  <div class="container is-max-desktop">
-    <div class="section-content">
-      <h2 class="title is-3">Why Current Metrics Fall Short</h2>
-
-      <div class="content">
-        <p>
-          Standard MDM metrics fail to provide proper likelihood evaluation. The ELBO is a loose bound (not exact) computed under the wrong distribution (uniform, not test-time). Generative perplexity avoids both issues but introduces external model bias.
-        </p>
-
-        <div class="two-column">
-          <div>
-            <h4 class="title is-5">Evidence Lower Bound (ELBO)</h4>
-            <ol>
-              <li><strong>Lower bound, not exact.</strong> The gap between ELBO and true likelihood (the <em>variational gap</em>) can be large, underestimating model quality.</li>
-              <li><strong>Wrong distribution.</strong> ELBO measures likelihood under <em>uniform random</em> position selection $\pi^{\mathrm{unif}}$ (all orderings equally likely). At test time, deterministic policies $\pi^F$ avoid bad orderings that uniform selection includes&mdash;but ELBO doesn't reflect this.</li>
-            </ol>
-          </div>
-
-          <div>
-            <h4 class="title is-5">Generative Perplexity</h4>
-            <ol>
-              <li><strong>Reference model bias.</strong> Samples are scored by GPT-2, whose preferences may not reflect true quality.</li>
-              <li><strong>Ignores diversity.</strong> A model repeating one good phrase scores well despite mode collapse.</li>
-            </ol>
-          </div>
-        </div>
-
-        <div class="key-insight" style="margin-top: 2rem;">
-          <strong style="color: #ffd700;">DUEL resolves both:</strong> It computes <em>exact</em> likelihood (not a bound) under the <em>test-time</em> distribution $p_\theta^{\pi^F}$ (the actual distribution sampled from with deterministic policy $\pi^F$, not uniform $\pi^{\mathrm{unif}}$), using only the MDM itself (no external reference model).
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- Experiment 1: Perplexity Gap -->
-<section class="section">
-  <div class="container is-max-desktop">
-    <div class="section-content">
-      <h2 class="title is-3">Experiment 1: Reassessing the Perplexity Gap</h2>
-
-      <div class="content">
-        <p>
-          MDMs have consistently lagged behind ARMs in perplexity benchmarks. But how much of this gap reflects true model quality, and how much is an artifact of using the ELBO instead of exact likelihood? We evaluate multiple MDM architectures&mdash;including SEDD, MDLM, and BD3-LM&mdash;against a comparable autoregressive baseline.
-        </p>
-
-        <p>
-          For each model, we compute both the ELBO (the standard metric) and DUEL exact likelihood using greedy confidence unmasking. We report perplexity (lower is better) and the percentage of the ARM-MDM gap that DUEL closes:
-        </p>
-
-        <div class="definition-box">
-          <p class="def-title">Gap Closed Metric</p>
-          $$\text{Gap Closed} = \frac{\Delta_{\mathrm{ELBO}} - \Delta_{\mathrm{DUEL}}}{\Delta_{\mathrm{ELBO}}} \times 100\%$$
-          <p style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;">where $\Delta = \mathrm{PPL}_{\mathrm{MDM}} - \mathrm{PPL}_{\mathrm{ARM}}$ measures how far the MDM lags behind the ARM.</p>
-        </div>
-
-        <h4 class="title is-5">In-Domain Results</h4>
-        <p>
-          DUEL consistently improves over the ELBO, closing 20-32% of the gap across all models. These gains come entirely from proper evaluation&mdash;the underlying models are unchanged. The improvement is expected: the ELBO averages over all orderings equally, including poor ones, while deterministic policies avoid such orderings.
-        </p>
-
-        <div class="table-row">
-          <div class="table-cell">
-            <h4 class="title is-6">OpenWebText (ARM: 17.54)</h4>
-            <table class="results-table">
-              <thead>
-                <tr>
-                  <th>Model</th>
-                  <th>ELBO</th>
-                  <th>DUEL</th>
-                  <th>Gap Closed</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>SEDD</td>
-                  <td>$\leq$24.10</td>
-                  <td class="highlight">22.58</td>
-                  <td>23.2%</td>
-                </tr>
-                <tr>
-                  <td>MDLM</td>
-                  <td>$\leq$22.98</td>
-                  <td class="highlight">21.86</td>
-                  <td>20.6%</td>
-                </tr>
-                <tr>
-                  <td>BD3-LM ($L'$=4)</td>
-                  <td>$\leq$20.73</td>
-                  <td class="highlight">19.73</td>
-                  <td>31.3%</td>
-                </tr>
-                <tr>
-                  <td>BD3-LM ($L'$=8)</td>
-                  <td>$\leq$21.68</td>
-                  <td class="highlight">20.37</td>
-                  <td>31.6%</td>
-                </tr>
-                <tr>
-                  <td>BD3-LM ($L'$=16)</td>
-                  <td>$\leq$22.27</td>
-                  <td class="highlight">20.76</td>
-                  <td>31.9%</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="table-cell">
-            <h4 class="title is-6">LM1B (ARM: 26.73)</h4>
-            <table class="results-table">
-              <thead>
-                <tr>
-                  <th>Model</th>
-                  <th>ELBO</th>
-                  <th>DUEL</th>
-                  <th>Gap Closed</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>SEDD</td>
-                  <td>$\leq$33.79</td>
-                  <td class="highlight">32.48</td>
-                  <td>18.6%</td>
-                </tr>
-                <tr>
-                  <td>MDLM</td>
-                  <td>$\leq$32.76</td>
-                  <td class="highlight">31.02</td>
-                  <td>28.9%</td>
-                </tr>
-                <tr>
-                  <td>BD3-LM ($L'$=4)</td>
-                  <td>$\leq$30.51</td>
-                  <td class="highlight">29.40</td>
-                  <td>29.4%</td>
-                </tr>
-                <tr>
-                  <td>BD3-LM ($L'$=8)</td>
-                  <td>$\leq$31.02</td>
-                  <td class="highlight">29.69</td>
-                  <td>31.0%</td>
-                </tr>
-                <tr>
-                  <td>BD3-LM ($L'$=16)</td>
-                  <td>$\leq$31.26</td>
-                  <td class="highlight">29.86</td>
-                  <td>30.8%</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <h4 class="title is-5" style="margin-top: 2rem;">Zero-Shot Transfer & Large-Scale Results</h4>
-        <p>
-          Zero-shot evaluation on held-out datasets shows even larger improvements. BD3-LM closes up to 82% of the gap on Penn Treebank, with average gap closure of 30-49% across models. At 8B parameters, DUEL consistently reduces LLaDA perplexity compared to the ELBO across all benchmarks.
-        </p>
-
-        <div class="table-row">
-          <div class="table-cell">
-            <h4 class="title is-6">Zero-Shot Transfer (Gap Closed %)</h4>
-            <table class="results-table">
-              <thead>
-                <tr>
-                  <th>Dataset</th>
-                  <th>SEDD</th>
-                  <th>MDLM</th>
-                  <th>BD3-LM</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>PTB</td><td>31.3%</td><td>34.3%</td><td>81.8%</td></tr>
-                <tr><td>Wikitext</td><td>40.8%</td><td>28.5%</td><td>31.4%</td></tr>
-                <tr><td>AG News</td><td>25.7%</td><td>27.8%</td><td>51.7%</td></tr>
-                <tr style="font-weight: bold; background: #f8f9fa;"><td><em>Average</em></td><td>30.0%</td><td>29.9%</td><td>48.7%</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="table-cell">
-            <h4 class="title is-6">Large-Scale (8B Parameters)</h4>
-            <table class="results-table">
-              <thead>
-                <tr>
-                  <th>Model</th>
-                  <th>Method</th>
-                  <th>Wiki</th>
-                  <th>Lamb.</th>
-                  <th>AG</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>Llama3</td><td>Exact</td><td>7.94</td><td>32.40</td><td>41.29</td></tr>
-                <tr><td rowspan="2">LLaDA</td><td>ELBO</td><td>$\leq$15.3</td><td>$\leq$39.0</td><td>$\leq$85.2</td></tr>
-                <tr><td>DUEL</td><td class="highlight">14.50</td><td class="highlight">36.00</td><td class="highlight">78.91</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="takeaway-box" style="margin-top: 1.5rem;">
-          <strong style="color: #ffd700;">Takeaway:</strong> These improvements come purely from proper likelihood evaluation&mdash;exact likelihood under the test-time distribution, rather than a loose bound under the training distribution. The models themselves are unchanged. MDMs are closer to ARMs than previously believed.
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- Experiment 2: Sampling Strategies -->
-<section class="section hero is-light">
-  <div class="container is-max-desktop">
-    <div class="section-content">
-      <h2 class="title is-3">Experiment 2: Comparing Sampling Strategies</h2>
-
-      <div class="content">
-        <p>
-          DUEL enables principled comparison of unmasking rules by fixing the denoiser $x_\theta$ and varying only the rule $F$. This comparison is impossible with the ELBO (which ignores the unmasking policy entirely) and unreliable with generative perplexity (which depends on a biased reference model).
-        </p>
-
-        <h4 class="title is-5">Comparing Fast Samplers</h4>
-
-        <p>
-          Fast samplers differ in their unmasking rule $F$. Aggressive rules unmask many positions per step for speed; conservative rules unmask fewer for quality. DUEL enables principled comparison by measuring exact likelihood under the test-time distribution. Other metrics&mdash;the ELBO, generative perplexity, entropy, MAUVE&mdash;are unreliable: the ELBO ignores the unmasking policy, generative perplexity depends on a biased reference model, and entropy/MAUVE have other shortcomings.
-        </p>
-
-        <p>DUEL perplexity by unmasking rule on OWT. Model: BD3-LM ($L'$=16). ELBO: $\leq$23.52.</p>
-
-        <table class="results-table">
-          <thead>
-            <tr>
-              <th>Unmask Rule $F$</th>
-              <th>NFE=128</th>
-              <th>NFE=256</th>
-              <th>NFE=512</th>
-              <th>NFE=1024</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Left-to-Right</td>
-              <td>240.27</td>
-              <td>109.71</td>
-              <td>45.99</td>
-              <td class="highlight">21.46</td>
-            </tr>
-            <tr>
-              <td>Greedy Confidence</td>
-              <td>164.94</td>
-              <td>66.64</td>
-              <td>34.74</td>
-              <td>22.03</td>
-            </tr>
-            <tr>
-              <td>Probability Margin</td>
-              <td class="highlight">140.38</td>
-              <td class="highlight">57.48</td>
-              <td class="highlight">32.24</td>
-              <td>22.05</td>
-            </tr>
-            <tr>
-              <td>Confidence Threshold*</td>
-              <td>226.97</td>
-              <td>116.83</td>
-              <td>43.48</td>
-              <td>22.05</td>
-            </tr>
-          </tbody>
-        </table>
-        <p style="font-size: 0.85rem; color: #666;">*Adaptive NFE; thresholds chosen to match target step counts.</p>
-
-        <div class="takeaway-box">
-          <strong style="color: #ffd700;">Takeaway:</strong> Probability margin performs best at low compute. DUEL gives consistent rankings across budgets; generative perplexity rankings cross repeatedly&mdash;left-to-right scores best at 128 NFE despite worst DUEL perplexity (degenerate text that GPT-2 rewards).
-        </div>
-
-        <!-- Collapsible section for unreliable metrics comparison -->
-        <details class="collapsible-section">
-          <summary><span><strong>Why Other Metrics Fail</strong></span></summary>
-          <div class="collapsible-content-inner">
-            <p>We compare DUEL perplexity against three sample-based metrics&mdash;generative perplexity, entropy, and MAUVE&mdash;and find each unreliable:</p>
-            <ul>
-              <li><strong>Generative perplexity</strong> rankings are inconsistent across NFE budgets. Strikingly, left-to-right achieves the <em>lowest</em> generative perplexity at 128 NFE despite having the <em>worst</em> DUEL perplexity. The explanation: left-to-right produces low-entropy, repetitive text at low NFE, and autoregressive evaluators like GPT-2 reward such degenerate output with low perplexity. Generative perplexity also distorts magnitude, showing 30&ndash;40&times; degradation from 1024 to 128 NFE versus 6&ndash;11&times; under DUEL.</li>
-              <li><strong>Entropy</strong> confirms the degeneracy: left-to-right drops to ~4.2 bits at low NFE (repetitive text), while probability margin and greedy confidence maintain ~4.8&ndash;5.0 bits (diverse output). However, entropy alone cannot rank samplers&mdash;it measures diversity, not quality.</li>
-              <li><strong>MAUVE</strong> saturates near zero at low NFE for all rules, providing almost no discriminative signal. It is most useful for distinguishing high-quality regimes, not for comparing degraded generation.</li>
-            </ul>
-            <div class="figure-container">
-              <img src="static/images/rule_comparison.png" alt="Comparison of DUEL perplexity vs generative perplexity across NFE budgets">
-              <p class="caption"><strong>Figure:</strong> <strong>Left:</strong> DUEL perplexity yields consistent rankings. <strong>Right:</strong> Generative perplexity rankings cross repeatedly.</p>
-            </div>
-          </div>
-        </details>
-
-        <h4 class="title is-5" style="margin-top: 2rem;">Oracle Perplexity</h4>
-
-        <p>
-          Since different rules yield different likelihoods, we ask: what is the <em>best possible</em> perplexity achievable over all orderings? The <strong>oracle perplexity</strong> answers this by exhaustively searching all permutations and selecting the one that maximizes likelihood for each sequence. For BD3-LM ($L'=4$), we search all $4!=24$ permutations per block. This represents an upper bound on MDM performance&mdash;the best a model could achieve if it always chose the optimal unmasking order.
-        </p>
-
-        <table class="results-table">
-          <thead>
-            <tr>
-              <th>Model</th>
-              <th>Method</th>
-              <th>Unmask Rule</th>
-              <th>Perplexity</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>ARM</td>
-              <td>Exact</td>
-              <td>&mdash;</td>
-              <td>52.11</td>
-            </tr>
-            <tr>
-              <td>BD3-LM</td>
-              <td>ELBO</td>
-              <td>&mdash;</td>
-              <td>$\leq$61.67</td>
-            </tr>
-            <tr>
-              <td>BD3-LM</td>
-              <td>DUEL</td>
-              <td>Left-to-Right</td>
-              <td>54.94</td>
-            </tr>
-            <tr>
-              <td>BD3-LM</td>
-              <td>DUEL</td>
-              <td>Greedy Conf.</td>
-              <td>56.73</td>
-            </tr>
-            <tr>
-              <td>BD3-LM</td>
-              <td>DUEL</td>
-              <td>Prob. Margin</td>
-              <td>57.80</td>
-            </tr>
-            <tr>
-              <td>BD3-LM</td>
-              <td>DUEL</td>
-              <td>Oracle</td>
-              <td class="highlight">36.47</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="takeaway-box">
-          <strong style="color: #ffd700;">Takeaway:</strong> The oracle ordering (36.47) surpasses the ARM baseline (52.11)&mdash;a degree of freedom ARMs lack. This suggests potential for test-time compute methods that find better orderings without ground-truth access.
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!--BibTex citation -->
-<section class="section" id="BibTeX">
-  <div class="container is-max-desktop content">
-    <div class="bibtex-header">
-      <h2 class="title">BibTeX</h2>
-      <button class="copy-bibtex-btn" onclick="copyBibTeX()" title="Copy BibTeX to clipboard">
-        <i class="fas fa-copy"></i>
-        <span class="copy-text">Copy</span>
-      </button>
-    </div>
-    <pre id="bibtex-code"><code>@article{turok2026duel,
-  title={DUEL: Exact Likelihood for Masked Diffusion via Deterministic Unmasking},
-  author={Turok, Gilad and De Sa, Chris and Kuleshov, Volodymyr},
-  year={2026}
-}</code></pre>
-  </div>
-</section>
-<!--End BibTex citation -->
-
-
-<footer class="footer">
-<div class="container">
-  <div class="columns is-centered">
-    <div class="column is-8">
-      <div class="content">
-        <p>
-          This page was built using the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project Page Template</a> which was adopted from the <a href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
-          This website is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
-        </p>
-      </div>
-    </div>
+  <div class="tbl">
+    <div class="cap"><strong>(b) Zero-shot gap closed (%, &uarr;).</strong> Trained on OWT; BD3-LM with $L'{=}4$.</div>
+    <table>
+      <thead><tr><th>Dataset</th><th>SEDD</th><th>MDLM</th><th>BD3-LM</th></tr></thead>
+      <tbody>
+        <tr><td>PTB</td><td>31.3</td><td>34.3</td><td class="big">81.8</td></tr>
+        <tr><td>Wikitext</td><td>40.8</td><td>28.5</td><td>31.4</td></tr>
+        <tr><td>LM1B</td><td>22.1</td><td>29.0</td><td>29.8</td></tr>
+        <tr><td>AG News</td><td>25.7</td><td>27.8</td><td>51.7</td></tr>
+        <tr class="sep avg"><td>Average</td><td>30.0</td><td>29.9</td><td>48.7</td></tr>
+      </tbody>
+    </table>
   </div>
 </div>
-</footer>
+  <p>At 8B scale, <span class="sc">Duel</span> lowers LLaDA-8B&rsquo;s zero-shot perplexity by 5&ndash;8%.</p>
+  <details class="more">
+    <summary>More perplexity results: LM1B and 8B models</summary>
+    <div class="wide tables two">
+      <div class="tbl">
+        <div class="cap"><strong>(c) Held-out LM1B perplexity.</strong> AR baseline: 22.83.</div>
+        <table>
+          <thead><tr><th>Model</th><th class="elbo">ELBO <span class="arrow">&darr;</span></th><th class="duel"><span class="sc">Duel</span> <span class="arrow">&darr;</span></th><th>Gap closed <span class="arrow">&uarr;</span></th></tr></thead>
+          <tbody>
+            <tr><td>SEDD</td><td class="elbo"><span class="le">&le;</span>32.68</td><td class="duel win">31.51</td><td>11.9%</td></tr>
+            <tr><td>MDLM</td><td class="elbo"><span class="le">&le;</span>31.78</td><td class="duel win">29.03</td><td>30.7%</td></tr>
+            <tr><td>BD3-LM $L'{=}4$</td><td class="elbo"><span class="le">&le;</span>28.23</td><td class="duel win">26.97</td><td>23.3%</td></tr>
+            <tr><td>BD3-LM $L'{=}8$</td><td class="elbo"><span class="le">&le;</span>29.83</td><td class="duel win">27.85</td><td>28.3%</td></tr>
+            <tr><td>BD3-LM $L'{=}16$</td><td class="elbo"><span class="le">&le;</span>30.60</td><td class="duel win">28.39</td><td>28.4%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tbl">
+        <div class="cap"><strong>(d) 8B models: zero-shot perplexity (&darr;).</strong> Raw perplexity, since LLaDA and Llama&nbsp;3 (<a class="cite" href="https://arxiv.org/abs/2407.21783">Grattafiori et al., 2024</a>) differ in data and compute.</div>
+        <table>
+          <thead><tr><th>Model</th><th>Estimator</th><th>Wikitext</th><th>Lambada</th><th>AG News</th></tr></thead>
+          <tbody>
+            <tr><td>Llama3-8B</td><td>exact</td><td>7.94</td><td>32.40</td><td>41.29</td></tr>
+            <tr class="sep"><td>LLaDA-8B</td><td class="elbo-c">ELBO</td><td class="elbo"><span class="le">&le;</span>15.29</td><td class="elbo"><span class="le">&le;</span>39.04</td><td class="elbo"><span class="le">&le;</span>85.17</td></tr>
+            <tr><td>LLaDA-8B</td><td class="duel-c"><span class="sc">Duel</span></td><td class="duel win">14.50</td><td class="duel win">36.00</td><td class="duel win">78.91</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
 
+  <!-- ---------- 4.2 Scaling ---------- -->
+  <h3 id="scaling"><span class="n">3.2</span>Scaling laws <span class="claim">&mdash; the MDM&ndash;AR compute gap falls from 16&times; to 9&times;</span></h3>
+  <p>
+    Using the ELBO, <a class="cite" href="https://arxiv.org/abs/2410.18514">Nie et al. (2024)</a> found that MDMs need about 16&times; more compute than AR models to reach
+    the same loss. We rescore the same checkpoints with <span class="sc">Duel</span> and change nothing else.
+    <strong>The gap falls to 9&ndash;10&times; at every compute budget</strong>, a 31&ndash;41% reduction that
+    grows with scale. The ELBO is only about 0.07 nats loose, which looks negligible on a loss curve but makes an
+    enormous difference to the compute gap. <strong>Scaling laws need exact likelihoods.</strong>
+  </p>
+  <figure class="hero wide">
+    <img src="static/images/scaling_frontiers_two_panel.png" alt="Compute-optimal scaling laws for AR, MDM scored with the ELBO, and MDM scored with DUEL; the MDM–AR compute gap falls from 16× to 9×.">
+    <figcaption>
+      <strong>DUEL cuts the MDM&ndash;AR compute gap from 16&times; to 9&times;.</strong> The same SMDM checkpoints,
+      scored with the ELBO (bound) or with DUEL (exact). Arrows mark how much more compute an MDM needs to match AR.
+    </figcaption>
+  </figure>
+
+  <!-- ---------- 4.3 Multiple choice ---------- -->
+  <h3 id="mc"><span class="n">3.3</span>Multiple choice <span class="claim">&mdash; DUEL improves LLaDA-8B on all six tasks</span></h3>
+  <p>
+    Multiple-choice benchmarks select the answer with the highest likelihood, so the likelihood estimate directly
+    affects accuracy. We score LLaDA-8B-Base's answers with the ELBO or with <span class="sc">Duel</span>, using
+    greedy or left-to-right unmasking.
+  </p>
+  <div class="tbl narrow">
+    <div class="cap"><strong>Accuracy (%, &uarr;)</strong>, LLaDA-8B-Base. Small green numbers are gains over the ELBO.</div>
+    <table>
+      <thead>
+        <tr class="group"><th></th><th class="span elbo"><span>ELBO</span></th><th class="span duel" colspan="2"><span><span class="sc">Duel</span></span></th></tr>
+        <tr><th>Task</th><th>uniform</th><th>greedy</th><th>left-to-right</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>MuTual</td><td class="elbo">50.1</td><td>51.6<span class="d">+1.5</span></td><td>51.7<span class="d">+1.6</span></td></tr>
+        <tr><td>LogiQA</td><td class="elbo">34.1</td><td>39.0<span class="d">+4.9</span></td><td>41.6<span class="d">+7.5</span></td></tr>
+        <tr><td>LSAT-RC</td><td class="elbo">55.4</td><td>60.2<span class="d">+4.8</span></td><td class="win">65.1<span class="d">+9.7</span></td></tr>
+        <tr><td>PIQA</td><td class="elbo">74.8</td><td>76.1<span class="d">+1.3</span></td><td>76.7<span class="d">+1.9</span></td></tr>
+        <tr><td>LSAT-LR</td><td class="elbo">41.0</td><td>42.5<span class="d">+1.5</span></td><td>45.0<span class="d">+4.0</span></td></tr>
+        <tr><td>HellaSwag</td><td class="elbo">70.7</td><td>71.4<span class="d">+0.7</span></td><td>71.1<span class="d">+0.4</span></td></tr>
+        <tr class="sep avg"><td>Average</td><td class="elbo">54.3</td><td>56.8<span class="d">+2.5</span></td><td class="win">58.5<span class="d">+4.2</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    <span class="sc">Duel</span> improves accuracy on every task: by 2.5 points on average with greedy unmasking,
+    4.2 with left-to-right, and up to 9.7 on LSAT-RC.
+  </p>
+
+  <!-- ---------- 4.4 Sampler selection ---------- -->
+  <h3 id="samplers"><span class="n">3.4</span>Sampler selection <span class="claim">&mdash; DUEL agrees with an LLM judge on every decided comparison</span></h3>
+  <p>
+    The ELBO does not depend on the sampler, so it cannot compare samplers, but <span class="sc">Duel</span> can.
+    For BD3-LM (110M) and LLaDA-8B, we rank three samplers at matched compute budgets with <span class="sc">Duel</span>,
+    generative perplexity (gen-ppl) and MAUVE (<a class="cite" href="https://arxiv.org/abs/2102.01454">Pillutla et al., 2021</a>), and check each ranking against a blinded LLM judge.
+  </p>
+  <div class="tbl narrow">
+    <div class="cap"><strong>Agreement with the LLM judge</strong> on decided sampler pairs (all 12 pairs per scale in parentheses).</div>
+    <table>
+      <thead><tr><th>Scale</th><th class="duel"><span class="sc">Duel</span></th><th>gen-ppl</th><th>MAUVE</th></tr></thead>
+      <tbody>
+        <tr><td>110M (BD3-LM)</td><td class="duel win">7/7 <span class="le">(10/12)</span></td><td>1/7 <span class="le">(4/12)</span></td><td>5/7 <span class="le">(8/12)</span></td></tr>
+        <tr><td>8B (LLaDA)</td><td class="duel win">7/7 <span class="le">(11/12)</span></td><td>7/7 <span class="le">(11/12)</span></td><td>7/7 <span class="le">(8/12)</span></td></tr>
+        <tr class="sep"><td>Total</td><td class="duel win">14/14</td><td>8/14</td><td>12/14</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p style="margin-top:1.4rem">
+    <strong>Why gen-ppl fails.</strong> Both metrics are cross-entropies, but their entropy terms differ
+    (<span style="color:#2F7A6E">data</span>, <span style="color:#BC6440">sampler</span>,
+    <span style="color:#6E5A8A">external scorer</span>):
+  </p>
+  <div class="eq">
+    \[
+      \begin{aligned}
+        \log \text{gen-ppl}(F) &= H\big(\textcolor{#BC6440}{\ppol{\pF}}\big) + \KL\big(\textcolor{#BC6440}{\ppol{\pF}} \,\|\, \textcolor{#6E5A8A}{q}\big) \\
+        \log \text{DUEL-ppl}(F) &= H\big(\textcolor{#2F7A6E}{p_{\mathrm{data}}}\big) + \KL\big(\textcolor{#2F7A6E}{p_{\mathrm{data}}} \,\|\, \textcolor{#BC6440}{\ppol{\pF}}\big)
+      \end{aligned}
+      \tag{6}
+    \]
+  </div>
+  <p>
+    The entropy in gen-ppl, $H\big(\textcolor{#BC6440}{\ppol{\pF}}\big)$, is the sampler's own, so a sampler that produces repetitive, low-entropy text scores
+    well. The entropy in <span class="sc">Duel</span>, $H\big(\textcolor{#2F7A6E}{p_{\mathrm{data}}}\big)$, is the data's, which is the same for every sampler. At 110M,
+    gen-ppl ranks the most repetitive sampler <em>best</em>, while the judge ranks it <em>worst</em>.
+  </p>
+</section>
+
+<!-- ============================== 5. LIMITATIONS ============================== -->
+<section id="limits">
+  <h2><span class="n">04</span>Limitations</h2>
+  <p>
+    <span class="sc">Duel</span> requires a deterministic rule for choosing positions; stochastic or remasking
+    samplers bring back the sum over orders. Its cost also grows with sequence length, which makes it better suited
+    to final evaluation than to monitoring during training.
+  </p>
+</section>
+
+<!-- ============================== CITE ============================== -->
+<section id="cite">
+  <h2>Citation</h2>
+<pre class="bib" id="bibtex"><button class="copy" type="button" data-target="bibtex-code">Copy</button><code id="bibtex-code">@article{turok2026duel,
+  title   = {{DUEL}: Exact Likelihood Reshapes Masked Diffusion Scaling Laws and Beyond},
+  author  = {Turok, Gilad and Schiff, Yair and De Sa, Chris and Kuleshov, Volodymyr},
+  journal = {arXiv preprint arXiv:2603.01367},
+  year    = {2026}
+}</code></pre>
+</section>
+
+</div><!-- /col -->
 </main>
+
+<footer>
+  Gilad Turok, Yair Schiff, Chris De Sa, Volodymyr Kuleshov &middot; Cornell University
+  &middot; <a href="https://arxiv.org/abs/2603.01367">arXiv</a>
+  &middot; <a href="https://github.com/kuleshov-group/duel">Code</a>
+  &middot; <a href="#">Back to top</a>
+</footer>
 
 </body>
 </html>

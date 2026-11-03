@@ -91,8 +91,8 @@
     Frontier MDMs, however, select positions with <em>deterministic</em> rules such as confidence.
     To resolve this mismatch we introduce <span class="sc">Duel</span>, a framework that unifies common
     deterministic MDM samplers.
-    <strong><span class="sc">Duel</span> allows for likelihood computation that is both <em>exact</em> and
-    under the sampler that is <em>actually used</em></strong> during generation.
+    <strong><span class="sc">Duel</span> computes the likelihood <em>exactly</em>, under the sampler that is
+    <em>actually used</em></strong> during generation.
     <span class="sc">Duel</span> is a simple plug-and-play algorithm applicable to any pretrained MDM with no
     retraining.
     To compute the likelihood of a text sequence, simply replay generation, reveal the true tokens instead of
